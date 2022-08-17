@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href='https://api.mapbox.com/mapbox-assembly/v0.24.0/assembly.min.css' rel='stylesheet'>
+    <script src='https://api.mapbox.com/mapbox-assembly/v0.24.0/assembly.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css' rel='stylesheet' />
+    <script
+        src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet'
+        href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.2.0/mapbox-gl-geocoder.css'
+        type='text/css' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/geojson/0.5.0/geojson.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+    <script src='https://npmcdn.com/csv2geojson@latest/csv2geojson.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel='stylesheet' href="style.css" />
+<link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+<title>ottbike</title>
+
+</head>
+
+<body>
+
+
+    <div class="content">
+
+        <div class='sidebar'>
+
+            <div class="header">
+
+                <div class="overview">
+
+                    <div class="title-ottbike">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-bicycle" viewBox="0 0 16 16">
+                            <path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5zm1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139L5.5 6.943zM8 9.057 9.598 6.5H6.402L8 9.057zM4.937 9.5a1.997 1.997 0 0 0-.487-.877l-.548.877h1.035zM3.603 8.092A2 2 0 1 0 4.937 10.5H3a.5.5 0 0 1-.424-.765l1.027-1.643zm7.947.53a2 2 0 1 0 .848-.53l1.026 1.643a.5.5 0 1 1-.848.53L11.55 8.623z"/>
+                          </svg>
+
+                        ottbike
+                    </div>
+                    
+                    <div class="description">Mapping Ottawa's protected intersections</div> 
+
+                </div>
+
+                <div class="tally-container">
+
+                    <div id="Built" class="tally">
+                         
+                       <div class="tally-built"> 22</div>
+                       Built
+
+                    </div>
+
+                    <div id="Planned" class="tally">
+                         
+                        <div class="tally-planned"> 23</div>
+                        Planned
+                        
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id='listings' class='listings'>
+                <div class="shadow"></div>
+            </div>
+
+            <div class="footer">
+
+                
+
+
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfyxgte8bmdax2Xuql3jUFLat91gKEinKE4JDxHjaWHjh-uyg/viewform?usp=sf_link" target="_blank">
+                    <button class="submit">Submit Missing Data</button>
+                </a>
+    
+                <div class="footerInfo">
+    
+
+                    <a href="https://twitter.com/RobShudra" target="_blank">
+                        <p id="about">About</p>
+                    </a>
+                    
+                    <a href="https://documents.ottawa.ca/sites/documents/files/protectedintersection_dg_en.pdf" target="_blank">
+                        <p id="guide">Design Guide</p>
+                    </a>
+
+                    <p id="updated">Updated August 12, 2022</p>
+
+    
+                </div>
+    
+              </div>
+
+          </div>
+
+          <div id="map" class="map"></div>
+
+          <div class="mobile-blocker">
+
+           
+
+            <div id="message" class="overview">
+
+                <div class="title-ottbike">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-bicycle" viewBox="0 0 16 16">
+                        <path d="M4 4.5a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0 1v.5h4.14l.386-1.158A.5.5 0 0 1 11 4h1a.5.5 0 0 1 0 1h-.64l-.311.935.807 1.29a3 3 0 1 1-.848.53l-.508-.812-2.076 3.322A.5.5 0 0 1 8 10.5H5.959a3 3 0 1 1-1.815-3.274L5 5.856V5h-.5a.5.5 0 0 1-.5-.5zm1.5 2.443-.508.814c.5.444.85 1.054.967 1.743h1.139L5.5 6.943zM8 9.057 9.598 6.5H6.402L8 9.057zM4.937 9.5a1.997 1.997 0 0 0-.487-.877l-.548.877h1.035zM3.603 8.092A2 2 0 1 0 4.937 10.5H3a.5.5 0 0 1-.424-.765l1.027-1.643zm7.947.53a2 2 0 1 0 .848-.53l1.026 1.643a.5.5 0 1 1-.848.53L11.55 8.623z"/>
+                      </svg>
+
+                    ottbike
+                </div>
+
+               Mapping Ottawa's protected intersections
+
+            </div>
+
+            <div class="messageContainer">
+
+                <h1> Sorry </h1>
+                The map isn't mobile friendly yet
+                
+            </div>
+         
+
+          </div>
+
+        </div>
+
+</body>
+
+<script>
+
+</script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+
+</html>
